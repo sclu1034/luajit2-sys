@@ -1,9 +1,11 @@
 use fs_extra::dir;
 use fs_extra::dir::CopyOptions;
 use std::env;
+use std::path::PathBuf;
 use std::process::{Command, Stdio};
 
 const LIB_NAME: &str = "luajit";
+const LUAJIT_HEADERS: [&str; 4] = ["lua.h", "lualib.h", "lauxlib.h", "luajit.h"];
 
 fn main() {
     let luajit_dir = format!("{}/luajit", env!("CARGO_MANIFEST_DIR"));
@@ -53,4 +55,36 @@ fn main() {
     println!("cargo:include={}", src_dir);
     println!("cargo:rustc-link-search=native={}", src_dir);
     println!("cargo:rustc-link-lib=static={}", LIB_NAME);
+
+    let mut bindings = bindgen::Builder::default();
+
+    for header in LUAJIT_HEADERS {
+        println!("cargo:rerun-if-changed={}/src/{}", luajit_dir, header);
+        bindings = bindings.header(format!("{}/src/{}", luajit_dir, header));
+    }
+
+    let bindings = bindings
+        .allowlist_var("LUA.*")
+        .allowlist_var("LUAJIT.*")
+        .allowlist_type("lua_.*")
+        .allowlist_type("luaL_.*")
+        .allowlist_function("lua_.*")
+        .allowlist_function("luaL_.*")
+        .allowlist_function("luaJIT.*")
+        .ctypes_prefix("libc")
+        .impl_debug(true)
+        .use_core()
+        .clang_arg("-Iluajit/src")
+        // Make it pretty
+        .rustfmt_bindings(true)
+        .sort_semantically(true)
+        .merge_extern_blocks(true)
+        .parse_callbacks(Box::new(bindgen::CargoCallbacks))
+        .generate()
+        .expect("Failed to generate bindings");
+
+    let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
+    bindings
+        .write_to_file(out_path.join("bindings.rs"))
+        .expect("Failed to write bindings");
 }

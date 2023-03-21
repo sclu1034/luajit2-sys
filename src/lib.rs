@@ -1,6 +1,8 @@
 #![no_std]
 #![allow(non_snake_case)]
 #![allow(non_camel_case_types)]
+#![allow(clippy::deprecated_semver)]
+#![allow(clippy::missing_safety_doc)]
 
 //! # LuaJIT 2.1
 //!
@@ -15,7 +17,9 @@
 //!
 //! <http://wiki.luajit.org/NYI>
 
-mod ffi;
+mod ffi {
+    include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
+}
 pub use ffi::*;
 
 use core::ptr;
@@ -92,7 +96,7 @@ pub unsafe fn lua_isthread(L: *mut lua_State, idx: libc::c_int) -> libc::c_int {
 /// <https://www.lua.org/manual/5.1/manual.html#lua_isnone>
 #[inline]
 pub unsafe fn lua_isnone(L: *mut lua_State, idx: libc::c_int) -> libc::c_int {
-    (lua_type(L, idx) == LUA_TNONE as i32) as i32
+    (lua_type(L, idx) == LUA_TNONE) as i32
 }
 
 /// <https://www.lua.org/manual/5.1/manual.html#lua_isnoneornil>
