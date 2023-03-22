@@ -26,6 +26,7 @@ fn main() {
     let mut buildcmd = Command::new("make");
     buildcmd.current_dir(&src_dir);
     buildcmd.stderr(Stdio::inherit());
+    buildcmd.arg("--no-silent");
     buildcmd.arg("BUILDMODE=static");
 
     if env::var("CARGO_CFG_WINDOWS").is_ok() {
@@ -34,10 +35,10 @@ fn main() {
     }
 
     if cfg!(target_pointer_width = "32") {
-        buildcmd.env("HOST_CC", "gcc -m32");
+        buildcmd.arg("HOST_CC='gcc -m32'");
         buildcmd.arg("-e");
     } else {
-        buildcmd.env("HOST_CC", "gcc");
+        buildcmd.arg("HOST_CC='gcc'");
     }
 
     let mut child = buildcmd.spawn().expect("failed to run make");
@@ -74,14 +75,25 @@ fn main() {
         .ctypes_prefix("libc")
         .impl_debug(true)
         .use_core()
-        .clang_arg("-Iluajit/src")
+        .detect_include_paths(true)
         // Make it pretty
         .rustfmt_bindings(true)
         .sort_semantically(true)
         .merge_extern_blocks(true)
-        .parse_callbacks(Box::new(bindgen::CargoCallbacks))
-        .generate()
-        .expect("Failed to generate bindings");
+        .parse_callbacks(Box::new(bindgen::CargoCallbacks));
+
+    let bindings = if env::var("CARGO_CFG_WINDOWS").is_ok() {
+        bindings
+            // .clang_arg("-I/usr/x86_64-w64-mingw32/include")
+            .clang_arg("-I/xwin/sdk/include/ucrt")
+            .clang_arg("-I/xwin/sdk/include/um")
+            .clang_arg("-I/xwin/sdk/include/shared")
+            .clang_arg("-I/xwin/crt/include")
+            .generate()
+            .expect("Failed to generate bindings")
+    } else {
+        bindings.generate().expect("Failed to generate bindings")
+    };
 
     let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
     bindings
