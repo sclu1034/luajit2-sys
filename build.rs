@@ -168,12 +168,14 @@ fn main() {
     // sources to re-compile just the library.
     if env::var("CARGO_CFG_WINDOWS").is_ok() {
         build_msvc(&src_dir, &out_dir);
+        println!("cargo:rustc-link-search={}", out_dir);
+    } else {
+        println!("cargo:rustc-link-search=native={}", src_dir);
     }
 
     println!("cargo:lib-name={}", LIB_NAME);
     println!("cargo:include={}", src_dir);
-    println!("cargo:rustc-link-search={}", out_dir);
-    println!("cargo:rustc-link-lib={}", LIB_NAME);
+    println!("cargo:rustc-link-lib=static={}", LIB_NAME);
 
     let mut bindings = bindgen::Builder::default();
 
