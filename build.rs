@@ -86,7 +86,7 @@ const LUAJIT_SRC: [&str; 69] = [
 
 fn build_gcc(src_dir: &str) {
     let mut buildcmd = Command::new("make");
-    buildcmd.current_dir(&src_dir);
+    buildcmd.current_dir(src_dir);
     buildcmd.stderr(Stdio::inherit());
     buildcmd.arg("--no-silent");
 
