@@ -7,12 +7,11 @@ use std::process::{Command, Stdio};
 
 const LIB_NAME: &str = "luajit";
 const LUAJIT_HEADERS: [&str; 4] = ["lua.h", "lualib.h", "lauxlib.h", "luajit.h"];
-const LUAJIT_SRC: [&str; 69] = [
+const LUAJIT_SRC: [&str; 65] = [
     // LJCORE_O
     // The MSVC toolchain cannot compile this assembler file,
     // as it contains GNU-specific directives
     // "lj_vm.S",
-    "lj_assert.c",
     "lj_gc.c",
     "lj_err.c",
     "lj_char.c",
@@ -25,7 +24,6 @@ const LUAJIT_SRC: [&str; 69] = [
     "lj_udata.c",
     "lj_meta.c",
     "lj_debug.c",
-    "lj_prng.c",
     "lj_state.c",
     "lj_dispatch.c",
     "lj_vmevent.c",
@@ -33,7 +31,6 @@ const LUAJIT_SRC: [&str; 69] = [
     "lj_strscan.c",
     "lj_strfmt.c",
     "lj_strfmt_num.c",
-    "lj_serialize.c",
     "lj_api.c",
     "lj_profile.c",
     "lj_lex.c",
@@ -80,7 +77,6 @@ const LUAJIT_SRC: [&str; 69] = [
     "lib_debug.c",
     "lib_jit.c",
     "lib_ffi.c",
-    "lib_buffer.c",
     "lib_init.c",
 ];
 
