@@ -192,11 +192,10 @@ fn main() {
         .impl_debug(true)
         .use_core()
         .detect_include_paths(true)
-        // Make it pretty
-        .rustfmt_bindings(true)
+        .formatter(bindgen::Formatter::Rustfmt)
         .sort_semantically(true)
         .merge_extern_blocks(true)
-        .parse_callbacks(Box::new(bindgen::CargoCallbacks));
+        .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()));
 
     let bindings = if env::var("CARGO_CFG_WINDOWS").is_ok() {
         bindings
