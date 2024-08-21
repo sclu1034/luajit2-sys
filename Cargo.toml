@@ -15,6 +15,6 @@ links = "luajit"
 libc = "0.2"
 
 [build-dependencies]
-bindgen = "0.69.4"
+bindgen = "0.70.1"
 cc = "1"
 fs_extra = "1.1.0"
